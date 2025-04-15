@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Rewardly Go</title>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+
+        // Your Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAEzZYKQNqQLteWsZmDJKq0sYVhvG6YE9E", // Replace with your own API key
+            authDomain: "rewardly-go.firebaseapp.com",     // Replace with your Firebase Auth domain
+            projectId: "rewardly-go",                      // Replace with your Firebase Project ID
+            storageBucket: "rewardly-go.appspot.com",      // Replace with your Firebase Storage bucket
+            messagingSenderId: "587297879139",             // Replace with your Firebase Messaging Sender ID
+            appId: "1:587297879139:web:50499dff5b83aa420a3456",  // Replace with your Firebase App ID
+            measurementId: "G-C3V2KQ8TWT"                  // Replace with your Firebase Measurement ID
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Login function
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginButton = document.getElementById('loginButton');
+            loginButton.addEventListener('click', async (event) => {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+
+                try {
+                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                    console.log('User logged in successfully:', userCredential.user);
+                    window.location.href = 'dashboard.html'; // Redirect after successful login
+                } catch (error) {
+                    console.error('Error signing in:', error);
+                    alert("Login failed. Please check your credentials.");
+                }
+            });
+        });
+    </script>
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.2/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex justify-center items-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 class="text-2xl font-semibold text-center text-gray-700 mb-6">Login to Rewardly Go</h2>
+        
+        <!-- Email Input -->
+        <input type="email" id="email" placeholder="Email Address" class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+        
+        <!-- Password Input -->
+        <input type="password" id="password" placeholder="Password" class="w-full px-4 py-2 mb-6 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+
+        <!-- Login Button -->
+        <button id="loginButton" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-300">Login</button>
+        
+        <!-- Signup Link -->
+        <div class="mt-4 text-center text-gray-600">
+            Don't have an account? <a href="register.html" class="text-blue-500 hover:underline">Sign up</a>
+        </div>
+    </div>
+</body>
+</html>
