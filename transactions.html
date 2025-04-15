@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Transaction History</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-gray-100 font-sans flex flex-col items-center min-h-screen p-6">
+
+  <h2 class="text-2xl font-bold mb-6 text-gray-800">Transaction History</h2>
+
+  <!-- Transaction List -->
+  <div id="transactionList" class="w-full max-w-md space-y-4"></div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAEzZYKQNqQLteWsZmDJKq0sYVhvG6YE9E",
+      authDomain: "rewardly-go.firebaseapp.com",
+      projectId: "rewardly-go",
+      storageBucket: "rewardly-go.appspot.com",
+      messagingSenderId: "587297879139",
+      appId: "1:587297879139:web:50499dff5b83aa420a3456"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const transactionList = document.getElementById('transactionList');
+
+    // Load transactions for the authenticated user
+    const loadTransactions = () => {
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          db.collection("transactions")
+            .where("uid", "==", user.uid)
+            .orderBy("timestamp", "desc")
+            .onSnapshot(snapshot => {
+              transactionList.innerHTML = "";  // Clear previous transactions
+
+              if (snapshot.empty) {
+                transactionList.innerHTML = `<p class="text-center text-gray-500">No transactions found.</p>`;
+              } else {
+                snapshot.forEach(doc => {
+                  const data = doc.data();
+                  const date = data.timestamp?.toDate();
+                  const formattedDate = date ? date.toLocaleString() : "Unknown";
+
+                  const item = document.createElement("div");
+                  item.className = "bg-white p-4 rounded-lg shadow-md";
+                  item.innerHTML = `
+                    <p class="font-semibold text-lg text-gray-800">${data.type}</p>
+                    <p class="text-green-600 font-bold">₱${data.amount.toFixed(2)}</p>
+                    <p class="text-sm text-gray-500">${formattedDate}</p>
+                  `;
+                  transactionList.appendChild(item);
+                });
+              }
+            });
+        } else {
+          window.location.href = "login.html";  // Redirect to login if user is not authenticated
+        }
+      });
+    };
+
+    // Initial load when page loads
+    loadTransactions();
+  </script>
+
+</body>
+</html>

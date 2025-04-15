@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rewardly Go - Deposit</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100 font-sans flex justify-center items-center min-h-screen">
+
+  <div class="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full">
+    <h2 class="text-2xl font-bold mb-4 text-gray-800 text-center">Deposit</h2>
+
+    <!-- QR Code Section -->
+    <div class="flex flex-col items-center mb-6">
+      <p class="text-lg text-gray-700 mb-2">Scan the QR code to deposit</p>
+      <img src="https://via.placeholder.com/200" alt="QR Code" class="mb-4">
+      <p class="text-center text-sm text-gray-600 mb-6">
+        Use the QR code above to deposit your funds to our account.
+      </p>
+    </div>
+
+    <!-- Telegram Link Section -->
+    <div class="text-center mb-6">
+      <p class="text-lg text-gray-700 mb-2">After depositing, send your deposit proof.</p>
+      <a href="https://t.me/YourTelegramBot" target="_blank" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md text-center transition duration-300">
+        Chat with us on Telegram
+      </a>
+    </div>
+
+    <!-- Deposit Instructions -->
+    <div class="text-center text-gray-600 mb-6">
+      <p class="text-sm mb-4">1. Deposit the amount to the QR code above.</p>
+      <p class="text-sm mb-4">2. After depositing, send a screenshot of the deposit proof to us via Telegram.</p>
+      <p class="text-sm mb-4">3. Once we verify your deposit, your balance will be updated.</p>
+    </div>
+
+    <!-- Go back to Dashboard -->
+    <div class="text-center">
+      <a href="dashboard.html" class="bg-gray-700 hover:bg-gray-800 text-white py-2 px-4 rounded-md transition duration-300">
+        Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAEzZYKQNqQLteWsZmDJKq0sYVhvG6YE9E",
+      authDomain: "rewardly-go.firebaseapp.com",
+      projectId: "rewardly-go",
+      storageBucket: "rewardly-go.appspot.com",
+      messagingSenderId: "587297879139",
+      appId: "1:587297879139:web:50499dff5b83aa420a3456",
+      measurementId: "G-C3V2KQ8TWT"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      }
+    });
+  </script>
+</body>
+</html>

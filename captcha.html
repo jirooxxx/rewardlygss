@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Solve CAPTCHA - Rewardly Go</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+  <div class="bg-white p-6 rounded shadow-xl w-full max-w-sm text-center">
+    <h1 class="text-xl font-bold mb-4">Solve CAPTCHA</h1>
+    <p class="mb-2 text-gray-600">Earn ₱2.00 per correct solve (Max: 100/day)</p>
+    
+    <div id="captchaBox" class="text-2xl font-mono font-bold tracking-widest bg-gray-200 p-3 rounded mb-4"></div>
+    
+    <input type="text" id="captchaInput" class="border p-2 w-full rounded mb-4" placeholder="Enter CAPTCHA" />
+    
+    <button id="solveBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded w-full">Submit</button>
+    <p class="text-sm text-gray-500 mt-4" id="remaining">Remaining today: Loading...</p>
+
+    <button onclick="location.href='dashboard.html'" class="mt-6 bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded w-full">Back to Dashboard</button>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAEzZYKQNqQLteWsZmDJKq0sYVhvG6YE9E",
+      authDomain: "rewardly-go.firebaseapp.com",
+      projectId: "rewardly-go",
+      storageBucket: "rewardly-go.appspot.com",
+      messagingSenderId: "587297879139",
+      appId: "1:587297879139:web:50499dff5b83aa420a3456"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const captchaBox = document.getElementById("captchaBox");
+    const captchaInput = document.getElementById("captchaInput");
+    const solveBtn = document.getElementById("solveBtn");
+    const remainingText = document.getElementById("remaining");
+
+    let generatedCaptcha = "";
+    const rewardAmount = 2.00;
+    const maxPerDay = 100;
+    let userRef = null;
+    let todayKey = "";
+
+    function generateCaptcha(length = 10) {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      let result = "";
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }
+
+    function refreshCaptcha() {
+      generatedCaptcha = generateCaptcha(10 + Math.floor(Math.random() * 3)); // 10-12 chars
+      captchaBox.textContent = generatedCaptcha;
+      captchaInput.value = "";
+    }
+
+    async function updateRemaining(userData) {
+      const dailyCaptcha = userData.dailyCaptcha || {};
+      const todayCount = dailyCaptcha[todayKey] || 0;
+      remainingText.textContent = `Remaining today: ${maxPerDay - todayCount}`;
+      return todayCount;
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) return window.location.href = "login.html";
+      userRef = db.collection("users").doc(user.uid);
+
+      const now = new Date();
+      todayKey = now.toISOString().split('T')[0]; // yyyy-mm-dd
+
+      const doc = await userRef.get();
+      const userData = doc.exists ? doc.data() : {};
+
+      let todayCount = await updateRemaining(userData);
+      refreshCaptcha();
+
+      solveBtn.addEventListener("click", async () => {
+        const input = captchaInput.value.trim();
+
+        if (input === generatedCaptcha) {
+          if (todayCount >= maxPerDay) {
+            Swal.fire("Limit Reached", "You’ve already solved 100 CAPTCHAs today!", "info");
+            return;
+          }
+
+          todayCount += 1;
+          const newBalance = (userData.balance || 0) + rewardAmount;
+
+          await userRef.update({
+            balance: newBalance,
+            [`dailyCaptcha.${todayKey}`]: todayCount
+          });
+
+          Swal.fire("Success", `Correct! You earned ₱${rewardAmount.toFixed(2)}`, "success");
+          remainingText.textContent = `Remaining today: ${maxPerDay - todayCount}`;
+          refreshCaptcha();
+        } else {
+          Swal.fire("Wrong", "CAPTCHA did not match!", "error");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
